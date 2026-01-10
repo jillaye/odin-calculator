@@ -1,0 +1,33 @@
+ul {
+    list-style-type: none; /* Removes the bullet points */
+    padding-left: 0px;
+    margin-top: 0px;    /* Removes the default top margin */
+    margin-bottom: 0px; /* Removes the default bottom margin */
+}
+
+#content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border:1px solid black;
+    max-width: 150px;
+    gap: 10px;
+    padding-bottom: 10px;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    /* width: 100%; */
+}
+
+/* this does nothing */
+#result {
+    border:1px solid black;
+    gap: 10px;
+    width: 85%;
+    height: 20px;
+    margin-top: 10px;
+}
