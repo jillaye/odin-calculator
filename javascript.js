@@ -1,69 +1,119 @@
-function add (a, b) {
-    return a + b;
+let a = "";
+let b = "";
+let operator = "";
+let numberRegister = "";
+const result = document.getElementById('result');
+
+function add (x, y) {
+    return x + y;
 }
 
-function substract (a, b) {
-    return a - b;
+function substract (x, y) {
+    return x - y;
 }
 
-function mulitply (a, b) {
-    return a * b;
+function mulitply (x, y) {
+    return x * y;
 }
 
-function divide (a, b) {
-    if (b !== 0) {
-        return a / b;
+function divide (x, y) {
+    if (y !== 0) {
+        return x / y;
     } else {
         return NaN;
     }    
 }
 
-function operate(aString, bString, operator) {
-    a = parseFloat(aString);
-    b = parseFloat(bString);
+function operate() {
+    numA = parseFloat(a);
+    numB = parseFloat(b);
     switch (operator) {
     case "add":
-        return add(a, b);
+        return add(numA, numB);
     case "subtract":
-        return substract(a, b);
+        return substract(numA, numB);
     case "multiply":
-        return mulitply(a, b);
+        return mulitply(numA, numB);
     case "divide":
-        return divide(a, b);
+        return divide(numA, numB);
     }
 }
 
-class Manager {
-    constructor(result) {
-        this.result = result;
-        this.reset();
+function reset(clearScreen = false) {
+    a = "";
+    b = "";
+    operator = "";
+    if (clearScreen) {
+        result.innerText = "";
     }
+    toggleDecimalPoint(true);
+    enableOperators();
+}
 
-    reset() {
-        this.a = "";
-        this.b = ""; 
-        this.currentlyProcessing = this.a; 
-        this.currentOperation = "";
-    }
-
-    processOp(op) {
-        if (this.currentlyProcessing === this.a) {
-            this.a = numberRegister;
-            this.currentlyProcessing = this.b;
+function processOp() {
+    let value;
+    if (a === "") {
+        a = numberRegister;
+        disableOperators();
+    } else if (numberRegister === "") {
+        disableOperators();
+        return;
+    } else {
+        b = numberRegister;
+        if (operator === "divide" && b === "0")
+        {
+            processDivByZero();
+            return;
         } else {
-            this.b = numberRegister;
-            this.currentlyProcessing = this.a;
+            value = operate();
         }
-        this.currentOperation = op;
-        numberRegister = "";
+        result.innerText = value;
+        a = value.toString();
+        enableOperators();
     }
+    numberRegister = "";
+}
 
-    processEquals() {
-        this.b = numberRegister;
-        this.currentlyProcessing = this.a;
-        this.result.innerText = operate(this.a, this.b, this.currentOperation);
-        this.reset();
+function processDivByZero() {
+    const dialog = document.querySelector("dialog");
+    dialog.showModal();
+    setTimeout(() => dialog.close(), 5000);
+    reset(true);
+    numberRegister = ""
+}
+
+function processEquals() {
+    if (a === "") {
+        return;
     }
+    b = numberRegister;
+    if (operator === "divide" && b === "0") {
+        processDivByZero();
+        return;
+    } else {
+        value = operate();
+    }
+    result.innerText = value;
+    reset();
+    a = value.toString();
+    numberRegister = ""
+    enableOperators();
+}
+
+
+function toggleDecimalPoint(isEnabled) {
+    document.getElementById("decimal").disabled = !isEnabled;
+}
+
+function disableOperators() {
+    let ops =  document.querySelectorAll('.operator');
+    // ops.forEach(op => op.id === "equals" ? op.disable = false : op.disabled = true);
+    ops.forEach(op => op.disabled = true);
+}
+
+function enableOperators() {
+    let ops =  document.querySelectorAll('.operator');
+    ops.forEach(op => op.disabled = false);
 }
 
 // addEventListeners adds event listeners for each number key on the calculator.
@@ -71,36 +121,54 @@ function addEventListeners() {
     const numbers = document.querySelectorAll('.number');
     numbers.forEach(num => {
         num.addEventListener('click', function(e) {
-            let val = (e.target.id).slice(1);
-            numberRegister += val;
-            result.innerText = numberRegister;
-            console.log("Number pressed:", val);
+            if (numberRegister.length < 20) {
+                let val = e.target.id;
+                if(val === "decimal") {
+                    val = ".";
+                    toggleDecimalPoint(false);
+                } else {
+                    val = val.slice(1);
+                }
+                numberRegister += val;
+                result.innerText = numberRegister;
+                enableOperators();
+            }
         });
     });
+
     const ops = document.querySelectorAll('.operator');
     ops.forEach(op => {
         op.addEventListener('click', function(e) {
-            operator = e.target.id;
-            console.log("Operator pressed:", operator);
-            if (operator != "equals") {
-                manager.processOp(operator);
+            if (e.target.id != "equals") {
+                processOp();
+                operator = e.target.id;
+                disableOperators()
+
             } else {
-                manager.processEquals()
+                processEquals();
             }
+            toggleDecimalPoint(true);
         })
     })
+
+    const clear = document.getElementById('clear');
+    clear.addEventListener('click', function(e) {
+        reset(true);
+        numberRegister = "";
+    })
+
+    const backspace = document.getElementById('backspace');
+    backspace.addEventListener('click', function(e) {
+        numberRegister = numberRegister.slice(0, -1);
+        result.innerText = numberRegister;
+    })
+
 }
 
-let operator;
-let numberRegister = "";
-let manager = new Manager(document.getElementById('result'));
 addEventListeners();
 
 /* TODO
-Clear Button
-Delete Button
-Decimal point
-"Continous" operations (5 + 7 + 8 * 7, etc)
-move numberRegister into Manager
-figure out how to reset result after/between ops
+Calculator works - I think?!
+Add +/- button??
+all that is left is to not allow sums/products to exceed 20 char
 */

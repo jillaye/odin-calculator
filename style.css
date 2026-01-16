@@ -26,6 +26,7 @@ body {
     max-width: 280px;
     gap: 20px;
     padding: 20px;
+    background-color: lightgray;
 }
 
 .row {
@@ -54,6 +55,7 @@ button {
     height: 44px;
     width: 108px;
     font-size: large;
+    background-color: #d5ecdd;
 }
 
 #result {
@@ -65,4 +67,31 @@ button {
     width: 98%;
     height: 40px;
     padding-right: 10px;
+    background-color: whitesmoke;
+}
+
+.number {
+    background-color: #f2f4d1
+}
+
+.operator, #decimal {
+    background-color: #c5e4f6;
+}
+
+#decimal {
+    font-weight: 600;
+    margin: auto;
+}
+
+dialog {
+    background: #34b2de;
+    width: 400px;
+    height: 68px;
+    position: absolute; 
+    top: 20px;    
+    /* Moves the left edge to the horizontal middle */
+    left: 50%;    
+    /* Shift it back by 50% of its width to center it */
+    transform: translateX(-50%);
+    margin: 0 auto;
 }
