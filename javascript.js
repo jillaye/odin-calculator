@@ -24,10 +24,10 @@ function divide (x, y) {
     }    
 }
 
-function operate() {
-    numA = parseFloat(a);
-    numB = parseFloat(b);
-    switch (operator) {
+function operate(x, y, op) {
+    numA = parseFloat(x);
+    numB = parseFloat(y);
+    switch (op) {
     case "add":
         return add(numA, numB);
     case "subtract":
@@ -86,7 +86,7 @@ function processOp(op) {
             processDivByZero();
             return;
         } else {
-            value = operate();
+            value = operate(a, b, operator);
             reset();
             setResultText(value);
             a = value;
@@ -167,8 +167,8 @@ function addEventListeners() {
     backspace.addEventListener('click', function(e) {
         if (numberRegister.length >= 1) {
             numberRegister = numberRegister.slice(0, -1);
-            if (numberRegister === "0") {
-                numberRegister = "";
+            if (numberRegister === "") {
+                numberRegister = 0;
             }
             result.innerText = numberRegister;
         }
@@ -179,5 +179,4 @@ function addEventListeners() {
 addEventListeners();
 
 // TODO
-// 1. make operate take a, b, operator
-// 2. shouldn't need to disable operators
+// 1. shouldn't need to disable operators
