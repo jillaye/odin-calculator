@@ -39,67 +39,73 @@ function operate() {
     }
 }
 
-function reset(clearScreen = false) {
+function reset() {
     a = "";
     b = "";
     operator = "";
-    if (clearScreen) {
-        result.innerText = "";
-    }
+    numberRegister = "";
+    result.innerText = "";
     toggleDecimalPoint(true);
     enableOperators();
 }
 
-function processOp() {
-    let value;
+function setResultText(value) {
+    let val = parseFloat(value);
+    if (val > 10e16) {
+        result.innerText = val.toExponential(1);
+    }
+    else {
+        if(value.length > 18) {
+            value = value.slice(0,20);
+        }
+        result.innerText = value;
+    }
+}
+
+function processOp(op) {
     if (a === "") {
+        if (numberRegister === "" || op === "equals") {
+            return;
+        }
         a = numberRegister;
+        numberRegister = "";
+        setResultText(a);
+        operator = op;
         disableOperators();
-    } else if (numberRegister === "") {
+    } else if (operator === "") {
+        if (op === "equals") {
+            return
+        }
+        operator = op;
         disableOperators();
-        return;
     } else {
         b = numberRegister;
-        if (operator === "divide" && b === "0")
+        let value;
+        if (operator === "divide" && b == 0)
         {
             processDivByZero();
             return;
         } else {
             value = operate();
-        }
-        result.innerText = value;
-        a = value.toString();
-        enableOperators();
+            reset();
+            setResultText(value);
+            a = value;
+            if (op === "equals") {
+                operator = "";
+            } else {
+                operator = op;
+            }
+        }       
     }
-    numberRegister = "";
 }
 
+// processDivByZero displays a dialog for 5 seconds and resets the calculator
 function processDivByZero() {
     const dialog = document.querySelector("dialog");
     dialog.showModal();
     setTimeout(() => dialog.close(), 5000);
-    reset(true);
-    numberRegister = ""
-}
-
-function processEquals() {
-    if (a === "") {
-        return;
-    }
-    b = numberRegister;
-    if (operator === "divide" && b === "0") {
-        processDivByZero();
-        return;
-    } else {
-        value = operate();
-    }
-    result.innerText = value;
     reset();
-    a = value.toString();
-    numberRegister = ""
-    enableOperators();
 }
-
 
 function toggleDecimalPoint(isEnabled) {
     document.getElementById("decimal").disabled = !isEnabled;
@@ -107,7 +113,6 @@ function toggleDecimalPoint(isEnabled) {
 
 function disableOperators() {
     let ops =  document.querySelectorAll('.operator');
-    // ops.forEach(op => op.id === "equals" ? op.disable = false : op.disabled = true);
     ops.forEach(op => op.disabled = true);
 }
 
@@ -116,59 +121,63 @@ function enableOperators() {
     ops.forEach(op => op.disabled = false);
 }
 
+function handleDecimal() {
+    if (numberRegister === "") {
+        numberRegister = "0"
+    }
+    toggleDecimalPoint(false);
+}
+
 // addEventListeners adds event listeners for each number key on the calculator.
 function addEventListeners() {
+    // numbers and decimal point
     const numbers = document.querySelectorAll('.number');
     numbers.forEach(num => {
         num.addEventListener('click', function(e) {
-            if (numberRegister.length < 20) {
-                let val = e.target.id;
-                if(val === "decimal") {
-                    val = ".";
-                    toggleDecimalPoint(false);
-                } else {
-                    val = val.slice(1);
-                }
-                numberRegister += val;
-                result.innerText = numberRegister;
-                enableOperators();
+            let val = e.target.id;
+            if(val === "decimal") {
+                handleDecimal();
+                val = ".";
+            } else {
+                val = val.slice(1);
             }
+            numberRegister += val;
+            setResultText(numberRegister);
+            enableOperators();
         });
     });
 
+    // operators
     const ops = document.querySelectorAll('.operator');
     ops.forEach(op => {
         op.addEventListener('click', function(e) {
-            if (e.target.id != "equals") {
-                processOp();
-                operator = e.target.id;
-                disableOperators()
-
-            } else {
-                processEquals();
-            }
+            processOp(e.target.id)
             toggleDecimalPoint(true);
         })
     })
-
+    
+    // clear button
     const clear = document.getElementById('clear');
     clear.addEventListener('click', function(e) {
-        reset(true);
-        numberRegister = "";
+        reset();
     })
 
+    // backspace button
     const backspace = document.getElementById('backspace');
     backspace.addEventListener('click', function(e) {
-        numberRegister = numberRegister.slice(0, -1);
-        result.innerText = numberRegister;
+        if (numberRegister.length >= 1) {
+            numberRegister = numberRegister.slice(0, -1);
+            if (numberRegister === "0") {
+                numberRegister = "";
+            }
+            result.innerText = numberRegister;
+        }
     })
 
 }
 
 addEventListeners();
 
-/* TODO
-Calculator works - I think?!
-Add +/- button??
-all that is left is to not allow sums/products to exceed 20 char
-*/
+// TODO
+// 1. make operate take a, b, operator
+// 2. shouldn't need to disable operators
