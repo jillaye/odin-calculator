@@ -4,18 +4,22 @@ let operator = "";
 let numberRegister = "";
 const result = document.getElementById('result');
 
+// calculates x + y and returns result
 function add (x, y) {
     return x + y;
 }
 
+// calculates x - y and returns result
 function substract (x, y) {
     return x - y;
 }
 
+// calculates x * y and returns result
 function mulitply (x, y) {
     return x * y;
 }
 
+// calculates x / y and returns result
 function divide (x, y) {
     if (y !== 0) {
         return x / y;
@@ -24,6 +28,7 @@ function divide (x, y) {
     }    
 }
 
+// performs <x op y> and returns result
 function operate(x, y, op) {
     numA = parseFloat(x);
     numB = parseFloat(y);
@@ -39,6 +44,7 @@ function operate(x, y, op) {
     }
 }
 
+// resets calculator
 function reset() {
     a = "";
     b = "";
@@ -46,9 +52,9 @@ function reset() {
     numberRegister = "";
     result.innerText = "";
     toggleDecimalPoint(true);
-    enableOperators();
 }
 
+// populates the calculator "window"
 function setResultText(value) {
     let val = parseFloat(value);
     if (val > 10e16) {
@@ -62,41 +68,41 @@ function setResultText(value) {
     }
 }
 
+// event handler for when an operator (+-*/=) key is entered
 function processOp(op) {
-    if (a === "") {
-        if (numberRegister === "" || op === "equals") {
+    if (numberRegister === "") {
+        if (op === "equals") {
             return;
         }
+        operator = op;
+        return;
+    }
+    // set a
+    if (a === "") {
         a = numberRegister;
         numberRegister = "";
-        setResultText(a);
         operator = op;
-        disableOperators();
-    } else if (operator === "") {
-        if (op === "equals") {
-            return
-        }
-        operator = op;
-        disableOperators();
-    } else {
-        b = numberRegister;
-        let value;
-        if (operator === "divide" && b == 0)
-        {
-            processDivByZero();
-            return;
-        } else {
-            value = operate(a, b, operator);
-            reset();
-            setResultText(value);
-            a = value;
-            if (op === "equals") {
-                operator = "";
-            } else {
-                operator = op;
-            }
-        }       
+        return;
     }
+    // set b and calculate
+    let value;
+    b = numberRegister;
+    if (operator === "") {
+        operator = op;
+    }
+    if (operator === "divide" && b == 0)
+    {
+        processDivByZero();
+        return;
+    } else {
+        value = operate(a, b, operator);
+        reset();
+        setResultText(value);
+        if (op !== "equals") {
+            a = value;
+            operator = op;
+        }
+    }       
 }
 
 // processDivByZero displays a dialog for 5 seconds and resets the calculator
@@ -107,20 +113,13 @@ function processDivByZero() {
     reset();
 }
 
+// enables decimal point key if isEnabled = true, otherwise disables it
 function toggleDecimalPoint(isEnabled) {
     document.getElementById("decimal").disabled = !isEnabled;
 }
 
-function disableOperators() {
-    let ops =  document.querySelectorAll('.operator');
-    ops.forEach(op => op.disabled = true);
-}
-
-function enableOperators() {
-    let ops =  document.querySelectorAll('.operator');
-    ops.forEach(op => op.disabled = false);
-}
-
+// event handler for when decimal point key is selected that inserts a zero if there is
+// not a value to left of decimal and does not allow multiple decimal points.
 function handleDecimal() {
     if (numberRegister === "") {
         numberRegister = "0"
@@ -143,7 +142,6 @@ function addEventListeners() {
             }
             numberRegister += val;
             setResultText(numberRegister);
-            enableOperators();
         });
     });
 
@@ -167,16 +165,9 @@ function addEventListeners() {
     backspace.addEventListener('click', function(e) {
         if (numberRegister.length >= 1) {
             numberRegister = numberRegister.slice(0, -1);
-            if (numberRegister === "") {
-                numberRegister = 0;
-            }
             result.innerText = numberRegister;
         }
     })
-
 }
 
 addEventListeners();
-
-// TODO
-// 1. shouldn't need to disable operators
